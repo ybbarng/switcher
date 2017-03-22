@@ -6,6 +6,7 @@ class Switcher:
     battery_handler = None
     switch_handler = None
     time_handler = None
+    authority_handler = None
     uuids = None
 
     def __init__(self, address, address_type):
@@ -89,6 +90,11 @@ class Switcher:
             self.time_handler = self.get_handler(0x2b)
         return self.time_handler
 
+    def get_authority_handler(self):
+        if not self.authority_handler:
+            self.authority_handler = self.get_handler(0x1f)
+        return self.authority_handler
+
     def get_battery(self):
         battery_handler = self.get_battery_handler()
         battery = int.from_bytes(battery_handler.read(), byteorder='big')
@@ -103,6 +109,10 @@ class Switcher:
         day, hours, minutes = time_handler.read()
         return '{} {:02d}:{:02d}'.format(self.get_day_name(day), hours, minutes)
 
+    def get_authority(self):
+        authority_handler = self.get_authority_handler()
+        return authority_handler.read()[0]
+
     def manage_switch(self, switch, on=True):
         """
             switch: 1, 2
@@ -115,4 +125,5 @@ class Switcher:
 
     def run(self):
         print('Battery Status: {}'.format(self.get_battery()))
+        print('Authority : {}'.format(self.get_authority()))
         print('Time : {}'.format(self.get_time()))
