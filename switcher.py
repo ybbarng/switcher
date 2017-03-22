@@ -1,15 +1,19 @@
-from bluepy.btle import Peripheral
 from time import sleep
+
+from bluepy.btle import Peripheral
 
 class Switcher:
     switcher = None
     battery_handler = None
-    switch_handler = None
-    time_handler = None
+    hashed_share_code_handler = None
     authority_handler = None
+    time_handler = None
+    switch_handler = None
     uuids = None
+    share_code = None
 
-    def __init__(self, address, address_type):
+    def __init__(self, address, address_type, share_code):
+        self.share_code = share_code
         retry = True
         while retry:
             try:
@@ -26,6 +30,9 @@ class Switcher:
         finally:
             print('disconnect from the switcher')
             self.switcher.disconnect()
+
+    def to_bytes(self, digits):
+        return bytearray(int(ch) for ch in str(digits))
 
     def retrieve_informations(self):
         self.load_uuids()
@@ -74,31 +81,48 @@ class Switcher:
         for ch in characteristics:
             if ch.getHandle() == number_of_handler:
                 return ch
+        print('There is no handler: {}'.format(number_of_handler))
+        return None
 
     def get_battery_handler(self):
         if not self.battery_handler:
             self.battery_handler = self.get_handler(0xe)
         return self.battery_handler
 
-    def get_switch_handler(self):
-        if not self.switch_handler:
-            self.switch_handler = self.get_handler(0x11)
-        return self.switch_handler
-
-    def get_time_handler(self):
-        if not self.time_handler:
-            self.time_handler = self.get_handler(0x2b)
-        return self.time_handler
+    def get_hashed_share_code_handler(self):
+        if not self.hashed_share_code_handler:
+            self.hashed_share_code_handler = self.get_handler(0x1d)
+        return self.hashed_share_code_handler
 
     def get_authority_handler(self):
         if not self.authority_handler:
             self.authority_handler = self.get_handler(0x1f)
         return self.authority_handler
 
+    def get_time_handler(self):
+        if not self.time_handler:
+            self.time_handler = self.get_handler(0x2b)
+        return self.time_handler
+
+    def get_switch_handler(self):
+        if not self.switch_handler:
+            self.switch_handler = self.get_handler(0x11)
+        return self.switch_handler
+
     def get_battery(self):
         battery_handler = self.get_battery_handler()
         battery = int.from_bytes(battery_handler.read(), byteorder='big')
         return battery
+
+    def compare_hashed_share_code(self):
+        hashed_share_code_handler = self.get_hashed_share_code_handler()
+        hashed_share_code = self.to_bytes('0' + self.share_code)
+        print('Write: {}'.format(hashed_share_code))
+        return hashed_share_code_handler.write(hashed_share_code, True)
+
+    def get_authority(self):
+        authority_handler = self.get_authority_handler()
+        return authority_handler.read()[0]
 
     def get_day_name(self, day):
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -108,10 +132,6 @@ class Switcher:
         time_handler = self.get_time_handler()
         day, hours, minutes = time_handler.read()
         return '{} {:02d}:{:02d}'.format(self.get_day_name(day), hours, minutes)
-
-    def get_authority(self):
-        authority_handler = self.get_authority_handler()
-        return authority_handler.read()[0]
 
     def manage_switch(self, switch, on=True):
         """
@@ -125,5 +145,6 @@ class Switcher:
 
     def run(self):
         print('Battery Status: {}'.format(self.get_battery()))
+        print('Shared Hash Code : {}'.format(self.compare_hashed_share_code()))
         print('Authority : {}'.format(self.get_authority()))
         print('Time : {}'.format(self.get_time()))
