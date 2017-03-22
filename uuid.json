@@ -1,0 +1,21 @@
+{
+    "base_uuid_string": "-0000-1000-8000-00805f9b34fb",
+    "client_characteristic_config": "00002902-0000-1000-8000-00805f9b34fb",
+    "authority_service": "0000150d-0000-1000-8000-00805f9b34fb",
+    "authority_state_characteristic": "000025da-0000-1000-8000-00805f9b34fb",
+    "battery_level_characteristic": "000015aa-0000-1000-8000-00805f9b34fb",
+    "battery_level_service": "0000150a-0000-1000-8000-00805f9b34fb",
+    "firmware_version_characteristic": "000025ea-0000-1000-8000-00805f9b34fb",
+    "hashed_share_code_characteristic": "000015da-0000-1000-8000-00805f9b34fb",
+    "mac_addr_characteristic": "000015ea-0000-1000-8000-00805f9b34fb",
+    "real_time_characteristic": "000045ea-0000-1000-8000-00805f9b34fb",
+    "serial_number_characteristic": "000035ea-0000-1000-8000-00805f9b34fb",
+    "switcher_information_service": "0000150e-0000-1000-8000-00805f9b34fb",
+    "switch_operation_characteristic": "000015ba-0000-1000-8000-00805f9b34fb",
+    "switch_service": "0000150b-0000-1000-8000-00805f9b34fb",
+    "switch_stroke_level_characteristic": "000015bb-0000-1000-8000-00805f9b34fb",
+    "timer_characteristic": "000025ca-0000-1000-8000-00805f9b34fb",
+    "timer_operation_characteristic": "000015ca-0000-1000-8000-00805f9b34fb",
+    "timer_service": "0000150c-0000-1000-8000-00805f9b34fb",
+    "timer_ud_rev_characteristic": "000035ca-0000-1000-8000-00805f9b34fb"
+}
