@@ -66,41 +66,42 @@ class Switcher:
         print('descriptors')
         print(descriptors)
 
+    def get_handler(self, number_of_handler):
+        characteristics = self.switcher.getCharacteristics()
+        for ch in characteristics:
+            if ch.getHandle() == number_of_handler:
+                return ch
+
     def get_battery_handler(self):
         if not self.battery_handler:
-            characteristics = self.switcher.getCharacteristics()
-            for ch in characteristics:
-                if ch.getHandle() == 14:
-                    self.battery_handler = ch
-                    return ch
-        else:
-            return self.battery_handler
+            self.battery_handler = self.get_handler(0xe)
+        return self.battery_handler
 
     def get_switch_handler(self):
         if not self.switch_handler:
-            characteristics = self.switcher.getCharacteristics()
-            for ch in characteristics:
-                if ch.getHandle() == 17:
-                    self.switch_handler = ch
-                    return ch
-        else:
-            return self.switch_handler
+            self.switch_handler = self.get_handler(0x11)
+        return self.switch_handler
+
+    def manage_switch(self, switch, on=True):
+        """
+            switch: 1, 2
+            on: True / False
+        """
+        print('Switch {} {}'.format(switch, 'ON' if on else 'OFF'))
+        param = (switch - 1) * 2 + (0 if on else 1)
+        switch = self.get_switch_handler()
+        switch.write(bytes([param]))
 
     def run(self):
         battery_handler = self.get_battery_handler()
         battery = int.from_bytes(battery_handler.read(), byteorder='big')
         print('Battery Status: {}'.format(battery))
 
-        switch = self.get_switch_handler()
-        switch.write(bytes([0]))
-        print('Switch 1 ON')
+        self.manage_switch(1, True)
         sleep(2)
-        switch.write(bytes([1]))
-        print('Switch 1 OFF')
+        self.manage_switch(1, False)
         sleep(2)
-        switch.write(bytes([2]))
-        print('Switch 2 ON')
+        self.manage_switch(2, True)
         sleep(2)
-        switch.write(bytes([3]))
-        print('Switch 2 OFF')
+        self.manage_switch(2, False)
 
