@@ -17,7 +17,7 @@ class ScanDelegate(DefaultDelegate):
 
 
 def run(share_code):
-    scan_timeout = 20 # seconds
+    scan_timeout = 10 # seconds
 
     scanner = Scanner().withDelegate(ScanDelegate())
     retry = True
@@ -30,15 +30,16 @@ def run(share_code):
             print(e)
 
     for device in devices:
-        print('Device {} ({}), RSSI={}dB'.format(device.addr, device.addrType, device.rssi))
         name = None
         for ad_type, description, value in device.getScanData():
-            print('{} - {}: {}'.format(ad_type, description, value))
             if ad_type == 9:
                 name = value
+        if name is None or 'SWITCHER' not in name:
+            continue
+        print('Device {} ({}), RSSI={}dB'.format(device.addr, device.addrType, device.rssi))
         print('Connectable: {}'.format(device.connectable))
         if name == 'SWITCHER_M' and device.connectable:
-            print('Switcher is found.')
+            print('Connectable switcher is found.')
             Switcher(device.addr, device.addrType, share_code)
 
 
