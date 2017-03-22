@@ -20,27 +20,31 @@ def run(share_code):
     scan_timeout = 10 # seconds
 
     scanner = Scanner().withDelegate(ScanDelegate())
+    switcher = None
     retry = True
     while (retry):
         try:
+            print('Scanning...')
             devices = scanner.scan(scan_timeout)
-            retry = False
+            for device in devices:
+                name = None
+                for ad_type, description, value in device.getScanData():
+                    if ad_type == 9:
+                        name = value
+                if name is None or 'SWITCHER' not in name:
+                    continue
+                print('Device {} ({}), RSSI={}dB'.format(device.addr, device.addrType, device.rssi))
+                print('Connectable: {}'.format(device.connectable))
+                if name == 'SWITCHER_M' and device.connectable:
+                    print('Connectable switcher is found.')
+                    switcher = device
+                    retry = False
+                    break
+            print('Switcher is not found')
         except Exception as e:
             print('Error on scanning')
             print(e)
-
-    for device in devices:
-        name = None
-        for ad_type, description, value in device.getScanData():
-            if ad_type == 9:
-                name = value
-        if name is None or 'SWITCHER' not in name:
-            continue
-        print('Device {} ({}), RSSI={}dB'.format(device.addr, device.addrType, device.rssi))
-        print('Connectable: {}'.format(device.connectable))
-        if name == 'SWITCHER_M' and device.connectable:
-            print('Connectable switcher is found.')
-            Switcher(device.addr, device.addrType, share_code)
+    Switcher(device.addr, device.addrType, share_code)
 
 
 if __name__ == '__main__':
