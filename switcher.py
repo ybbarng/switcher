@@ -4,6 +4,7 @@ from bluepy.btle import Peripheral
 
 class Switcher:
     switcher = None
+    characteristics = None
     battery_handler = None
     hashed_share_code_handler = None
     authority_handler = None
@@ -59,7 +60,10 @@ class Switcher:
             print('UUID: {} ({})'.format(uuid, self.get_uuid_description(uuid)))
 
     def get_characteristics(self):
-        characteristics = self.switcher.getCharacteristics()
+        if self.characteristics is None:
+            self.characteristics = self.switcher.getCharacteristics()
+        return self.characteristics
+        '''
         print('characteristics')
         for ch in characteristics:
             uuid = str(ch.uuid)
@@ -67,6 +71,7 @@ class Switcher:
             print('Properties: {} ({})'.format(ch.properties, ch.propertiesToString()))
             print('Handler: 0x{:02x}'.format(ch.getHandle()))
             print('\n')
+        '''
 
     def get_descriptors(self):
         """
@@ -77,7 +82,7 @@ class Switcher:
         print(descriptors)
 
     def get_handler(self, number_of_handler):
-        characteristics = self.switcher.getCharacteristics()
+        characteristics = self.get_characteristics()
         for ch in characteristics:
             if ch.getHandle() == number_of_handler:
                 return ch
