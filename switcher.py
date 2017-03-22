@@ -5,6 +5,7 @@ class Switcher:
     switcher = None
     battery_handler = None
     switch_handler = None
+    time_handler = None
     uuids = None
 
     def __init__(self, address, address_type):
@@ -13,6 +14,7 @@ class Switcher:
             try:
                 print('Try to connect to the switcher...')
                 self.switcher = Peripheral(address, address_type)
+                print('Switcher is connected')
                 retry = False
             except Exception as e:
                 print('Error on connecting')
@@ -82,6 +84,25 @@ class Switcher:
             self.switch_handler = self.get_handler(0x11)
         return self.switch_handler
 
+    def get_time_handler(self):
+        if not self.time_handler:
+            self.time_handler = self.get_handler(0x2b)
+        return self.time_handler
+
+    def get_battery(self):
+        battery_handler = self.get_battery_handler()
+        battery = int.from_bytes(battery_handler.read(), byteorder='big')
+        return battery
+
+    def get_day_name(self, day):
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        return days[day]
+
+    def get_time(self):
+        time_handler = self.get_time_handler()
+        day, hours, minutes = time_handler.read()
+        return '{} {:02d}:{:02d}'.format(self.get_day_name(day), hours, minutes)
+
     def manage_switch(self, switch, on=True):
         """
             switch: 1, 2
@@ -93,15 +114,5 @@ class Switcher:
         switch.write(bytes([param]))
 
     def run(self):
-        battery_handler = self.get_battery_handler()
-        battery = int.from_bytes(battery_handler.read(), byteorder='big')
-        print('Battery Status: {}'.format(battery))
-
-        self.manage_switch(1, True)
-        sleep(2)
-        self.manage_switch(1, False)
-        sleep(2)
-        self.manage_switch(2, True)
-        sleep(2)
-        self.manage_switch(2, False)
-
+        print('Battery Status: {}'.format(self.get_battery()))
+        print('Time : {}'.format(self.get_time()))
