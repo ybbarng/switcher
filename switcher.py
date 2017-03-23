@@ -153,6 +153,9 @@ class Switcher:
 
     def run(self):
         print('Battery Status: {}'.format(self.get_battery()))
-        print('Shared Hash Code : {}'.format(self.compare_hashed_share_code()))
+        #print('Shared Hash Code : {}'.format(self.compare_hashed_share_code()))
         print('Authority : {}'.format(self.get_authority()))
         print('Time : {}'.format(self.get_time()))
+        while True:
+            switch, status = input().split()
+            self.manage_switch(int(switch), status=='1')
