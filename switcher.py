@@ -143,6 +143,9 @@ class Switcher:
             switch: 1, 2
             on: True / False
         """
+        if switch not in [1, 2]:
+            print('Switch must be 1 or 2')
+            return
         print('Switch {} {}'.format(switch, 'ON' if on else 'OFF'))
         param = (switch - 1) * 2 + (0 if on else 1)
         switch = self.get_switch_handler()
