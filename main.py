@@ -1,50 +1,36 @@
 import re
 
-from bluepy.btle import Scanner, DefaultDelegate
-
 from switcher import Switcher
 
+class SwitcherCallback:
+    def on_connected(self, switcher):
+        print('on_connected')
+        print('Battery Status: {}'.format(switcher.get_battery()))
+        #print('Shared Hash Code : {}'.format(self.compare_hashed_share_code()))
+        print('Authority : {}'.format(switcher.get_authority()))
+        print('Time : {}'.format(switcher.get_time()))
+        self.show_commands()
+        while True:
+            params = input().split()
+            if params[0] == 'SWITCH':
+                # "SWITCH 1 1"
+                # "SWITCH 1 0"
+                switcher.manage_switch(int(params[1]), parans[2]=='1')
+            elif params[0] == 'BAT':
+                print('Battery Status: {}'.format(switcher.get_battery()))
+            elif params[0] == 'TIME':
+                print('Time : {}'.format(switcher.get_time()))
+            elif params[0] == 'INFO':
+                switcher.show_informations()
+            elif params[0] == 'DIS':
+                switcher.disconnect()
 
-class ScanDelegate(DefaultDelegate):
-    def __init__(self):
-        super().__init__()
-
-    def handleDiscovery(self, device, is_new_device, is_new_data):
-        if is_new_device:
-            print('New device is discovered: {}'.format(device.addr))
-        elif is_new_data:
-            print('New data is received from: {}'.format(device.addr))
-
-
-def run(share_code):
-    scan_timeout = 10 # seconds
-
-    scanner = Scanner().withDelegate(ScanDelegate())
-    switcher = None
-    retry = True
-    while (retry):
-        try:
-            print('Scanning...')
-            devices = scanner.scan(scan_timeout)
-            for device in devices:
-                name = None
-                for ad_type, description, value in device.getScanData():
-                    if ad_type == 9:
-                        name = value
-                if name is None or 'SWITCHER' not in name:
-                    continue
-                print('Device {} ({}), RSSI={}dB'.format(device.addr, device.addrType, device.rssi))
-                print('Connectable: {}'.format(device.connectable))
-                if name == 'SWITCHER_M' and device.connectable:
-                    print('Connectable switcher is found.')
-                    switcher = device
-                    retry = False
-                    break
-            print('Switcher is not found')
-        except Exception as e:
-            print('Error on scanning')
-            print(e)
-    Switcher(device.addr, device.addrType, share_code)
+    def show_commands(self):
+        print('SWITCH 1 1')
+        print('BAT')
+        print('TIME')
+        print('INFO')
+        print('DIS')
 
 
 if __name__ == '__main__':
@@ -54,4 +40,4 @@ if __name__ == '__main__':
         share_code = input('Enter hashed share code (4 digits):')
         if share_code_pattern.match(share_code):
             break
-    run(share_code)
+    switcher = Switcher(share_code, 'df:d2:38:54:db:09', SwitcherCallback())
