@@ -20,7 +20,6 @@ class Audrey:
     def scan(self):
         scan_timeout = 10 # seconds
         scanner = Scanner()
-        audrey = None
         retry = True
         while (retry):
             try:
@@ -36,18 +35,18 @@ class Audrey:
                     print('Audrey is found: {}({} {})'.format(name, device.addr, device.addrType))
                     if device.connectable:
                         print('Connectable audrey is found.')
-                        audrey = device
+                        self.mac_address = device.addr
                         retry = False
                         break
                     else:
                         print('Audrey is busy')
-                if audrey is None:
+                if not self.mac_address:
                     print('Connectable audrey is not found. Retry...')
                     sleep(2)
             except Exception as e:
                 print('Error on scanning')
                 traceback.print_exc()
-        self.connect(audrey.addr, audrey.addrType)
+        self.connect()
 
     def connect(self, callback):
         retry = True
