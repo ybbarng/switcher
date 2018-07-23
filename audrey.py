@@ -1,3 +1,4 @@
+import functools
 from time import sleep
 import traceback
 
@@ -75,6 +76,21 @@ class Audrey:
                     print('Disconnect due to an error')
                     self.audrey.disconnect()
 
+    def auto_reconnect(func):
+        @functools.wraps(func)
+        def wrap(self, *args, **kargs):
+            while(True):
+                try:
+                    return func(self, *args, **kargs)
+                except BTLEException as e:
+                    if e.code == BTLEException.DISCONNECTED:
+                        print('Audrey has gone')
+                        print('Try reconnect...')
+                        self.connect()
+                    else:
+                        traceback.print_exc()
+        return wrap
+
     def disconnect(self):
         if self.audrey:
             self.audrey.disconnect()
@@ -83,6 +99,7 @@ class Audrey:
     def to_bytes(self, digits):
         return bytearray(int(ch) for ch in str(digits))
 
+    @auto_reconnect
     def send_command(self, command):
         command += '\r\n'
         print('Write: {}'.format(command))
