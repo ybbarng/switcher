@@ -1,43 +1,27 @@
 import re
 
-from switcher import Switcher
+from audrey import Audrey
 
-class SwitcherCallback:
-    def on_connected(self, switcher):
-        print('on_connected')
-        print('Battery Status: {}'.format(switcher.get_battery()))
-        #print('Shared Hash Code : {}'.format(self.compare_hashed_share_code()))
-        print('Authority : {}'.format(switcher.get_authority()))
-        print('Time : {}'.format(switcher.get_time()))
+class AudreyCallback:
+    def on_connected(self, audrey):
+        print('Audrey is connected!')
         self.show_commands()
         while True:
-            params = input().split()
-            if params[0] == 'SWITCH':
-                # "SWITCH 1 1"
-                # "SWITCH 1 0"
-                switcher.manage_switch(int(params[1]), parans[2]=='1')
-            elif params[0] == 'BAT':
-                print('Battery Status: {}'.format(switcher.get_battery()))
-            elif params[0] == 'TIME':
-                print('Time : {}'.format(switcher.get_time()))
-            elif params[0] == 'INFO':
-                switcher.show_informations()
-            elif params[0] == 'DIS':
-                switcher.disconnect()
+            command = input()
+            if command == 'dis':
+                audrey.disconnect()
+                break
+            else:
+                audrey.send_command(command)
 
     def show_commands(self):
-        print('SWITCH 1 1')
-        print('BAT')
-        print('TIME')
-        print('INFO')
-        print('DIS')
+        print('dis')
+        print('ON')
+        print('OFF')
+        print('NORMAL:COOL:24:LOW')
+        print('TOGGLE:POWER:ON')
 
 
 if __name__ == '__main__':
-    retry = True
-    share_code_pattern = re.compile('^\d{4}$')
-    while(retry):
-        share_code = input('Enter hashed share code (4 digits):')
-        if share_code_pattern.match(share_code):
-            break
-    switcher = Switcher(share_code, 'df:d2:38:54:db:09', SwitcherCallback())
+    audrey = Audrey('64:cf:d9:35:9c:74')
+    audrey.connect(AudreyCallback())
